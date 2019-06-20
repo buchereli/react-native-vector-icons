@@ -40,7 +40,7 @@ public class VectorIconsModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void getImageForFont(String fontFamily, String glyph, Integer fontSize, Integer color, Callback callback) {
+  public void getImageForFont(String fontFamily, String glyph, Integer fontSize, Integer color, Boolean clearCache, Callback callback) {
     Context context = getReactApplicationContext();
     File cacheFolder = context.getCacheDir();
     String cacheFolderPath = cacheFolder.getAbsolutePath() + "/";
@@ -54,9 +54,7 @@ public class VectorIconsModule extends ReactContextBaseJavaModule {
     String cacheFileUrl = "file://" + cacheFilePath;
     File cacheFile = new File(cacheFilePath);
 
-    if(cacheFile.exists()) {
-      callback.invoke(null, cacheFileUrl);
-    } else {
+    if(!cacheFile.exists()) {
       FileOutputStream fos = null;
       Typeface typeface = ReactFontManager.getInstance().getTypeface(fontFamily, 0, context.getAssets());
       Paint paint = new Paint();
@@ -98,7 +96,12 @@ public class VectorIconsModule extends ReactContextBaseJavaModule {
           }
         }
       }
+    } else {
+      if (clearCache) {
+        cacheFile.delete();
+      } else {
+        callback.invoke(null, cacheFileUrl);
+      }
     }
   }
-
 }
